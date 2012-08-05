@@ -6,7 +6,7 @@
 	};
 	var Qubit = function( el, options ) {
 		var self = this;
-		this.container = el = $(el);
+		this.scope = el = $(el);
 		$('input[type=checkbox]', el).on('change', function(e) {
 			self.process(e.target);
 		});
@@ -20,7 +20,7 @@
 			var checkbox = $(checkbox),
 				parentItems = checkbox.parents(this.itemSelector),
 				self = this;
-			// all children get this state
+			// all children inherit my state
 			$('input[type=checkbox]', parentItems.eq(0)).each(function() {
 				self.setChecked(this, checkbox.prop('checked'));
 			});
@@ -35,7 +35,7 @@
 					checked = siblings.filter(':checked'),
 					oldValue = this.getValue(parent), parentChecked = null;
 				// check parent is within our scope
-				if( !jQuery.contains(this.container, parent) ) {
+				if( !jQuery.contains(this.scope, parent) ) {
 					parent = null;
 				}
 				// if all siblings are checked
@@ -43,6 +43,7 @@
 					parentChecked = true;
 				// else if some are checked
 				else if( checked.length > 0
+						// or indeterminate
 						|| siblings.filter(this.isIndeterminate).length > 0 )
 					this.setIndeterminate(parent, true);
 				// else none are checked
