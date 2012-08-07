@@ -8,7 +8,7 @@
 		var self = this;
 		this.scope = el = $(el);
 		$('input[type=checkbox]', el).on('change', function(e) {
-			self.process(e.target);
+			self.process(e.target, e);
 		});
 		$('input[type=checkbox]:checked').each(function() {
 			self.process(this)
@@ -16,13 +16,13 @@
 	};
 	Qubit.prototype = {
 		itemSelector: 'li',
-		process: function( checkbox ) {
+		process: function( checkbox, event ) {
 			var checkbox = $(checkbox),
 				parentItems = checkbox.parents(this.itemSelector),
 				self = this;
 			// all children inherit my state
-			$('input[type=checkbox]', parentItems.eq(0)).each(function() {
-				self.setChecked(this, checkbox.prop('checked'));
+			parentItems.eq(0).find('input[type=checkbox]').each(function() {
+				self.setChecked(this, checkbox.prop('checked'), event);
 			});
 			this.processParents(checkbox);
 		},
@@ -57,11 +57,17 @@
 					this.processParents(parent);
 			}
 		},
-		setChecked: function( checkbox, value ) {
+		setChecked: function( checkbox, value, event ) {
 			$(checkbox).prop({
 				'checked': value,
 				'indeterminate': false
 			});
+			if( !event || !event.doneIds || event.doneIds.indexOf(checkbox.id) == -1 ) {
+				event = event || {type: 'change'};
+				event.doneIds = event.doneIds || [];
+				event.doneIds.push(checkbox.id);
+				$(checkbox).trigger(event);
+			}
 		},
 		setIndeterminate: function( checkbox, value ) {
 			$(checkbox).prop({
