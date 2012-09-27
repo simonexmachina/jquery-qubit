@@ -22,7 +22,9 @@
 				self = this;
 			// all children inherit my state
 			parentItems.eq(0).find('input[type=checkbox]').each(function() {
-				self.setChecked(this, checkbox.prop('checked'), event);
+				if( !$(this).parent().hasClass('hidden') ) {
+					self.setChecked(this, checkbox.prop('checked'), event);
+				}
 			});
 			this.processParents(checkbox);
 		},
