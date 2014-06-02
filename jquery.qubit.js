@@ -4,7 +4,7 @@
 			var qubit = new Qubit(this, options);
 		});
 	};
-	var Qubit = function( el, options ) {
+	var Qubit = function( el ) {
 		var self = this;
 		this.scope = el = $(el);
 		$('input[type=checkbox]', el).on('change', function(e) {
@@ -78,8 +78,8 @@
 			});
 		},
 		getSiblings: function( checkbox, listItem ) {
-			listItem = listItem || checkbox.parents(this.itemSelector).eq(1);
-			return $('> ol > li > input[type=checkbox]', listItem);
+			listItem = listItem || checkbox.parents(this.itemSelector).get(1);
+			return $('> ol > li > input[type=checkbox], > ul > li > input[type=checkbox]', listItem);
 		},
 		isIndeterminate: function() {
 			return $(this).prop('indeterminate');
