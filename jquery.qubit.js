@@ -60,6 +60,10 @@
 			}
 		},
 		setChecked: function( checkbox, value, event ) {
+			if (checkbox === null)
+			{
+				return false;
+			}
 			$(checkbox).prop({
 				'checked': value,
 				'indeterminate': false
@@ -85,6 +89,10 @@
 			return $(this).prop('indeterminate');
 		},
 		getValue: function( checkbox ) {
+			if (checkbox === null)
+			{
+				return null;
+			}
 			return checkbox.prop('indeterminate') ? null : checkbox.prop('checked');
 		}
 	};
