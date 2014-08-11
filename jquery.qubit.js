@@ -31,23 +31,22 @@
 		processParents: function( checkbox ) {
 			checkbox = $(checkbox);
 			var parentItems = checkbox.parents(this.itemSelector),
-				parent = parentItems.eq(1).children('input[type=checkbox]');
+					parent = parentItems.eq(1).children('input[type=checkbox]');
+			// check parent is within our scope
+			if( !jQuery.contains(this.scope[0], parent[0]) ) return;
 			if( parent.length > 0 ) {
 				var siblings = this.getSiblings(checkbox, parentItems.eq(1)),
 					checked = siblings.filter(':checked'),
 					oldValue = this.getValue(parent), parentChecked = null;
-				// check parent is within our scope
-				if( !jQuery.contains(this.scope[0], parent[0]) ) {
-					parent = null;
-				}
 				// if all siblings are checked
-				if( siblings.length == checked.length )
+				if( siblings.length == checked.length ) {
 					parentChecked = true;
+				}
 				// else if some are checked
 				else if( checked.length > 0 ||
 						// or indeterminate
 						siblings.filter(isIndeterminate).length > 0 ) {
-			  	this.setIndeterminate(parent, true);
+					this.setIndeterminate(parent, true);
 				}
 				// else none are checked
 				else {
