@@ -66,13 +66,6 @@
 				checked: value,
 				indeterminate: false
 			});
-
-			if( !event || !event.doneIds || event.doneIds.indexOf(checkbox.id) == -1 ) {
-				event = event || {type: 'change'};
-				event.doneIds = event.doneIds || [];
-				event.doneIds.push(checkbox.id);
-				$(checkbox).trigger(event);
-			}
 		},
 		setIndeterminate: function( checkbox, value ) {
 			$(checkbox).prop({
