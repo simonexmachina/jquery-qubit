@@ -6,79 +6,70 @@
   };
   var Qubit = function(el) {
     var self = this;
-    this.scope = el = $(el);
-    $('input[type=checkbox]', el).on('change', function(e) {
-      self.process(e.target, e);
+    this.scope = $(el);
+    this.scope.on('change', 'input[type=checkbox]', function(e) {
+      if (!self.suspendListeners) {
+        self.process(e.target);
+      }
     });
-    $('input[type=checkbox]:checked', el).each(function() {
-      self.process(this)
+    this.scope.find('input[type=checkbox]:checked').each(function() {
+      self.process(this);
     });
   };
   Qubit.prototype = {
     itemSelector: 'li',
-    process: function(checkbox, event) {
+    process: function(checkbox) {
       var checkbox = $(checkbox),
-          parentItems = checkbox.parentsUntil(this.scope, this.itemSelector),
-          self = this;
-      // all children inherit my state
-      parentItems.eq(0).find('input[type=checkbox]').each(function() {
-        if (!$(this).parent().hasClass('hidden')) {
-          self.setChecked(this, checkbox.prop('checked'), event);
+          parentItems = checkbox.parentsUntil(this.scope, this.itemSelector);
+      try {
+        this.suspendListeners = true;
+        // all children inherit my state
+        parentItems.eq(0).find('input[type=checkbox]')
+          .filter(checkbox.prop('checked') ? ':not(:checked)' : ':checked')
+          .each(function() {
+            if (!$(this).parent().hasClass('hidden')) {
+              $(this).prop('checked', checkbox.prop('checked'));
+            }
+          })
+          .trigger('change');
+        this.processParents(checkbox);
+      } finally {
+        this.suspendListeners = false;
+      }
+    },
+    processParents: function() {
+      var self = this;
+      this.scope.find('input[type=checkbox]').each(function() {
+        var $this = $(this),
+            parent = $this.closest(self.itemSelector),
+            children = parent.find('input[type=checkbox]').not($this),
+            numChecked = children.filter(':checked').length;
+
+        if (children.length) {
+          if (numChecked == 0) {
+            self.setChecked($this, false);
+          } else if (numChecked == children.length) {
+            self.setChecked($this, true);
+          } else {
+            self.setIndeterminate($this, true);
+          }
+        }
+        else {
+          self.setIndeterminate($this, false);
         }
       });
-      this.processParents(checkbox);
-    },
-    processParents: function(checkbox) {
-      checkbox = $(checkbox);
-      var parentItems = checkbox.parentsUntil(this.scope, this.itemSelector),
-          parent = parentItems.eq(1).children('input[type=checkbox]');
-      // check parent is within our scope
-      if (!$.contains(this.scope[0], parent[0])) return;
-      if (parent.length > 0) {
-        var siblings = this.getSiblings(checkbox, parentItems.eq(1)),
-            checked = siblings.filter(':checked'),
-            oldValue = this.getValue(parent), parentChecked = null;
-        // if all siblings are checked
-        if (siblings.length == checked.length) {
-          parentChecked = true;
-        }
-        // else if some are checked
-        else if (checked.length > 0 ||
-            // or indeterminate
-          siblings.filter(isIndeterminate).length > 0) {
-          this.setIndeterminate(parent, true);
-        }
-        // else none are checked
-        else {
-          parentChecked = false;
-        }
-        // update the parent
-        if (parentChecked !== null) this.setChecked(parent, parentChecked);
-        // and go up the tree if it changed
-        if (oldValue !== this.getValue(parent)) this.processParents(parent);
-      }
-      function isIndeterminate() {
-        return $(this).prop('indeterminate');
-      }
     },
     setChecked: function(checkbox, value, event) {
-      $(checkbox).prop({
-        checked: value,
-        indeterminate: false
-      });
+      checkbox.prop('indeterminate', false);
+      if (checkbox.prop('checked') != value) {
+        checkbox.prop('checked', value).trigger('change');
+      }
     },
     setIndeterminate: function(checkbox, value) {
-      $(checkbox).prop({
-        indeterminate: value,
-        checked: null
-      });
-    },
-    getSiblings: function(checkbox, listItem) {
-      listItem = listItem || checkbox.parentsUntil(this.itemSelector).get(1);
-      return $('> ol > li > input[type=checkbox], > ul > li > input[type=checkbox]', listItem);
-    },
-    getValue: function(checkbox) {
-      return $(checkbox).prop('indeterminate') ? null : $(checkbox).prop('checked');
+      checkbox.prop('indeterminate', value);
+      if (value) {
+        checkbox.prop('checked', true);
+      }
     }
   };
 }(jQuery));
