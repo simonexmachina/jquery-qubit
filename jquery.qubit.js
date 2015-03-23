@@ -12,7 +12,7 @@
         self.process(e.target);
       }
     });
-    this.scope.find('input[type=checkbox]:checked').each(function() {
+    this.scope.children("li").children('input[type=checkbox]:checked').each(function() {
       self.process(this);
     });
   };
