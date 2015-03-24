@@ -1,7 +1,7 @@
 (function($) {
   $.fn.qubit = function(options) {
     return this.each(function() {
-      var qubit = new Qubit(this, options);
+      new Qubit(this, options);
     });
   };
   var Qubit = function(el) {
@@ -12,15 +12,14 @@
         self.process(e.target);
       }
     });
-    this.scope.find('input[type=checkbox]:checked').each(function() {
-      self.process(this);
-    });
+    this.processParents();
   };
   Qubit.prototype = {
     itemSelector: 'li',
     process: function(checkbox) {
-      var checkbox = $(checkbox),
-          parentItems = checkbox.parentsUntil(this.scope, this.itemSelector);
+      checkbox = $(checkbox);
+      var parentItems = checkbox.parentsUntil(this.scope, this.itemSelector);
+      var self = this;
       try {
         this.suspendListeners = true;
         // all children inherit my state
@@ -28,11 +27,11 @@
           .filter(checkbox.prop('checked') ? ':not(:checked)' : ':checked')
           .each(function() {
             if (!$(this).parent().hasClass('hidden')) {
-              $(this).prop('checked', checkbox.prop('checked'));
+              self.setChecked($(this), checkbox.prop('checked'));
             }
           })
           .trigger('change');
-        this.processParents(checkbox);
+        this.processParents();
       } finally {
         this.suspendListeners = false;
       }
@@ -40,24 +39,26 @@
     processParents: function() {
       var self = this, changed = false;
       this.scope.find('input[type=checkbox]').each(function() {
-        var $this = $(this),
-            parent = $this.closest(self.itemSelector),
-            children = parent.find('input[type=checkbox]').not($this),
-            numChecked = children.filter(function() {
-              return $(this).prop('checked') || $(this).prop('indeterminate');
-            }).length;
+        var $this = $(this);
+        var parent = $this.closest(self.itemSelector);
+        var children = parent.find('input[type=checkbox]').not($this);
+        var numChecked = children.filter(function() {
+          return $(this).prop('checked') || $(this).prop('indeterminate');
+        }).length;
 
         if (children.length) {
-          if (numChecked == 0) {
-            if (self.setChecked($this, false)) changed = true;
-          } else if (numChecked == children.length) {
-            if (self.setChecked($this, true)) changed = true;
-          } else {
-            if (self.setIndeterminate($this, true)) changed = true;
+          if (numChecked === 0) {
+            self.setChecked($this, false) && (changed = true);
+          }
+          else if (numChecked == children.length) {
+            self.setChecked($this, true) && (changed = true);
+          }
+          else {
+            self.setIndeterminate($this, true) && (changed = true);
           }
         }
         else {
-          if (self.setIndeterminate($this, false)) changed = true;
+          self.setIndeterminate($this, false) && (changed = true);
         }
       });
       if (changed) this.processParents();
