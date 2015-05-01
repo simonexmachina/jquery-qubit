@@ -7,11 +7,16 @@
   var Qubit = function(el) {
     var self = this;
     this.scope = $(el);
-    this.scope.on('change', 'input[type=checkbox]', function(e) {
+    var handler = function(e) {
       if (!self.suspendListeners) {
         self.process(e.target);
       }
-    });
+    };
+    this.scope.on('change', 'input[type=checkbox]', handler);
+    // workaround for IE<10
+    if (document.documentMode && document.documentMode <= 9) {
+      this.scope.on('click', 'input[type=checkbox]:indeterminate', handler);
+    }
     this.processParents();
   };
   Qubit.prototype = {
