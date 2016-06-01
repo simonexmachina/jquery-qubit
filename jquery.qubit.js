@@ -28,7 +28,7 @@
       try {
         this.suspendListeners = true;
         // all children inherit my state
-        parentItems.eq(0).find('input[type=checkbox]')
+        parentItems.eq(0).find('input[type=checkbox]').not(':disabled')
           .filter(checkbox.prop('checked') ? ':not(:checked)' : ':checked')
           .each(function() {
             if (!$(this).parent().hasClass('hidden')) {
@@ -43,10 +43,10 @@
     },
     processParents: function() {
       var self = this, changed = false;
-      this.scope.find('input[type=checkbox]').each(function() {
+      this.scope.find('input[type=checkbox]').not(':disabled').each(function() {
         var $this = $(this);
         var parent = $this.closest(self.itemSelector);
-        var children = parent.find('input[type=checkbox]').not($this);
+        var children = parent.find('input[type=checkbox]').not(':disabled').not($this);
         var numChecked = children.filter(function() {
           return $(this).prop('checked') || $(this).prop('indeterminate');
         }).length;
