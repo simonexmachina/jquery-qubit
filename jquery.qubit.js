@@ -1,4 +1,12 @@
-(function($) {
+(function(factory){
+  if (typeof define === 'function' && define.amd) {
+    define(['jquery'], factory);
+  } else if (typeof exports === 'object') {
+    factory(require('jquery'));
+  } else {
+    factory(jQuery);
+  }
+}(function($) {
   $.fn.qubit = function(options) {
     return this.each(function() {
       new Qubit(this, options);
@@ -90,4 +98,4 @@
       }
     }
   };
-}(jQuery));
+}));
