@@ -42,8 +42,7 @@
             if (!$(this).parent().hasClass('hidden')) {
               self.setChecked($(this), checkbox.prop('checked'));
             }
-          })
-          .trigger('change');
+          });
         this.processParents();
       } finally {
         this.suspendListeners = false;
